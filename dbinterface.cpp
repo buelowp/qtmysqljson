@@ -55,6 +55,10 @@ bool DBInterface::getTableContents(QString table, QByteArray *results)
     }
     sql["rows"] = rows;
     doc.setObject(sql);
-    qDebug() << doc.toJson();
+    if (!doc.isEmpty() || !doc.isNull()) {
+        *results = doc.toJson(QJsonDocument::Compact);
+        return true;
+    }
+    
     return false;
 }

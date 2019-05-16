@@ -5,13 +5,7 @@ int main(int argc, char** argv)
 {
     QCoreApplication app(argc, argv);
     DBInterface dbi;
-    
-    if (dbi.open("fishfacts")) {
-        dbi.getTableContents("fish", NULL);
-    }
-    else {
-        qDebug() << __PRETTY_FUNCTION__ << ": Unable to open database";
-    }
+    QByteArray ba;
     
     return app.exec();
 }
