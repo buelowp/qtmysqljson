@@ -27,6 +27,7 @@
 
 MessageHandler::MessageHandler(QObject *parent) : QObject(parent)
 {
+    setupMqttSubscriber();
 }
 
 MessageHandler::~MessageHandler()
@@ -35,11 +36,14 @@ MessageHandler::~MessageHandler()
 
 void MessageHandler::connectionComplete()
 {
-    m_mqttClient->subscribeToTopic("database/#");
+    qDebug() << __PRETTY_FUNCTION__ << ": Connected to MQTT server";
+    m_mqttClient->subscribe("database/request/#");
 }
 
 void MessageHandler::disconnectedEvent()
 {
+    qDebug() << __PRETTY_FUNCTION__ << ": Disconnected from MQTT server";
+    m_mqttClient->connectToHost();
 }
 
 void MessageHandler::queryTable(QString database, QString table)
@@ -50,7 +54,7 @@ void MessageHandler::queryTable(QString database, QString table)
     
     if (db.open(database)) {
         if (db.getTableContents(table, &doc)) {
-            message.setTopic("weather/querytableresponse");
+            message.setTopic("database/response/querytableresponse");
             message.setPayload(doc.toJson(QJsonDocument::Compact));
             m_mqttClient->publish(message);
         }
@@ -65,7 +69,7 @@ void MessageHandler::queryTable(QString database, QString table, QString query)
     
     if (db.open(database)) {
         if (db.getTableContents(table, query, &doc)) {
-            message.setTopic("weather/querytablewithqueryresponse");
+            message.setTopic("database/response/querytablewithqueryresponse");
             message.setPayload(doc.toJson(QJsonDocument::Compact));
             m_mqttClient->publish(message);
         }
@@ -74,19 +78,24 @@ void MessageHandler::queryTable(QString database, QString table, QString query)
 
 void MessageHandler::messageReceivedOnTopic(QString topic, QString message)
 {
-    if (topic == "database/querytable") {
+    qDebug() << __PRETTY_FUNCTION__ << ": Message received for topic" << topic;
+    if (topic == "database/request/querytable") {
         QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8().data());
         if (!doc.isEmpty() || !doc.isNull()) {
+            qDebug() << __PRETTY_FUNCTION__ << ": JSON is valid";
             QJsonObject obj = doc.object();
-            if (obj.contains("datbase") && obj.contains("table"))
+            if (obj.contains("database") && obj.contains("table"))
                 queryTable(obj["database"].toString(), obj["table"].toString());
         }
+        else {
+            qDebug() << __PRETTY_FUNCTION__ << message;
+        }
     }
-    if (topic == "database/querytablewithquery") {
+    if (topic == "database/request/querytablewithquery") {
         QJsonDocument doc = QJsonDocument::fromJson(message.toUtf8().data());
         if (!doc.isEmpty() || !doc.isNull()) {
             QJsonObject obj = doc.object();
-            if (obj.contains("datbase") && obj.contains("table") && obj.contains("query"))
+            if (obj.contains("database") && obj.contains("table") && obj.contains("query"))
                 queryTable(obj["database"].toString(), obj["table"].toString(), obj["query"].toString());
         }
     }

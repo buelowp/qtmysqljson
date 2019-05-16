@@ -44,6 +44,7 @@ void QMqttSubscriber::onDisconnected()
 
 void QMqttSubscriber::onReceived(const QMQTT::Message& message)
 {
+    qDebug() << __PRETTY_FUNCTION__ << ": MQTT Message received";
     emit messageReceivedOnTopic(message.topic(), QString::fromUtf8(message.payload()));
 }
 
