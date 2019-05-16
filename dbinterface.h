@@ -1,18 +1,24 @@
 #ifndef dbinterface_H
 #define dbinterface_H
 
-#include <QObject>
+#include <QtCore/QtCore>
+#include <QtSql/QtSql>
 
-class dbinterface : public QObject
+class DBInterface : public QObject
 {
     Q_OBJECT
 
 public:
-    dbinterface();
-    virtual ~dbinterface();
+    DBInterface(QObject *parent = 0);
+    virtual ~DBInterface();
+    
+    bool open(QString);
+    void close();
+    bool getTableContents(QString, QByteArray*);
 
-private slots:
-    void output();
+private:
+    QSqlDatabase m_database;
+    bool m_databaseSelected;
 };
 
 #endif // dbinterface_H
