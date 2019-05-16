@@ -27,10 +27,8 @@ void DBInterface::close()
     m_database.close();
 }
 
-bool DBInterface::getTableContents(QString table, QByteArray *results)
+bool DBInterface::getTableContents(QString table, QJsonDocument *jsondoc)
 {
-    Q_UNUSED(results)
-    
     if (!m_database.isOpen()) {
         qDebug() << __PRETTY_FUNCTION__ << ": Database is not open";
         return false;
@@ -56,7 +54,47 @@ bool DBInterface::getTableContents(QString table, QByteArray *results)
     sql["rows"] = rows;
     doc.setObject(sql);
     if (!doc.isEmpty() || !doc.isNull()) {
-        *results = doc.toJson(QJsonDocument::Compact);
+        *jsondoc = doc;
+        return true;
+    }
+    
+    return false;
+}
+
+bool DBInterface::getTableContents(QString table, QString query, QJsonDocument *jsondoc)
+{
+    if (!m_database.isOpen()) {
+        qDebug() << __PRETTY_FUNCTION__ << ": Database is not open";
+        return false;
+    }
+    
+    if (!query.size() || !query.contains("SELECT")) {
+        qDebug() << __PRETTY_FUNCTION__ << ": Query string is empty or is trying to modify the database";
+        if (query.size())
+            qDebug() << __PRETTY_FUNCTION__ << ":" << query;
+        return false;
+    }
+    
+    QSqlQueryModel model;
+    model.setQuery(query);
+    QJsonDocument doc;
+    QJsonObject header;
+    QJsonObject sql;
+    QJsonArray rows;
+
+    qDebug() << __PRETTY_FUNCTION__ << ": Getting data from" << table;
+    sql["table"] = table;
+    for (int i = 0; i < model.rowCount(); ++i) {
+        QJsonObject row;
+        for (int j = 0; j < model.record(i).count(); j++) {
+            row[model.record(i).fieldName(j)] = model.record(i).value(j).toString();
+        }
+        rows.append(QJsonValue(row));
+    }
+    sql["rows"] = rows;
+    doc.setObject(sql);
+    if (!doc.isEmpty() || !doc.isNull()) {
+        *jsondoc = doc;
         return true;
     }
     

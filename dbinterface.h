@@ -14,7 +14,8 @@ public:
     
     bool open(QString);
     void close();
-    bool getTableContents(QString, QByteArray*);
+    bool getTableContents(QString, QJsonDocument*);
+    bool getTableContents(QString, QString, QJsonDocument*);
 
 private:
     QSqlDatabase m_database;
