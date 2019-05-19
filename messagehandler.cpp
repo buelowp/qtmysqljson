@@ -103,7 +103,7 @@ void MessageHandler::messageReceivedOnTopic(QString topic, QString message)
 
 void MessageHandler::setupMqttSubscriber()
 {
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "dbinterface", "dbinterface");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "qtmyssqljson", "qtmyssqljson");
     QString hostname = settings.value("mqttserver").toString();
     QHostInfo lookup = QHostInfo::fromName(hostname);
     QList<QHostAddress> addresses = lookup.addresses();

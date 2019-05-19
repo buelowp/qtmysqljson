@@ -11,12 +11,12 @@ DBInterface::~DBInterface()
 
 bool DBInterface::open(QString db)
 {
-    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "dbinterface", "dbinterface");
+    QSettings settings(QSettings::IniFormat, QSettings::UserScope, "qtmyssqljson", "qtmyssqljson");
     
     m_database = QSqlDatabase::addDatabase("QMYSQL");
-    m_database.setHostName(settings.value("hostname").toString());
-    m_database.setUserName(settings.value("username").toString());
-    m_database.setPassword(settings.value("password").toString());
+    m_database.setHostName(settings.value("dbhostname").toString());
+    m_database.setUserName(settings.value("dbusername").toString());
+    m_database.setPassword(settings.value("dbpassword").toString());
     m_database.setDatabaseName(db);
     
     return m_database.open();
