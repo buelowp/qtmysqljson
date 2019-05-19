@@ -12,14 +12,20 @@ DBInterface::~DBInterface()
 bool DBInterface::open(QString db)
 {
     QSettings settings(QSettings::IniFormat, QSettings::UserScope, "qtmyssqljson", "qtmyssqljson");
+    boolean rval;
     
     m_database = QSqlDatabase::addDatabase("QMYSQL");
     m_database.setHostName(settings.value("dbhostname").toString());
     m_database.setUserName(settings.value("dbusername").toString());
     m_database.setPassword(settings.value("dbpassword").toString());
+    m_database.setPort(settings.value("dbport").toInt());
     m_database.setDatabaseName(db);
     
-    return m_database.open();
+    rval = m_database.open();
+    if (!rval)
+        qWarning() << __PRETTY_FUNCTION__ << ":" << m_database.lastError();
+    
+    return rval;
 }
 
 void DBInterface::close()

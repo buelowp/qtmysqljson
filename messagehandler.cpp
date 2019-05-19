@@ -84,8 +84,9 @@ void MessageHandler::messageReceivedOnTopic(QString topic, QString message)
         if (!doc.isEmpty() || !doc.isNull()) {
             qDebug() << __PRETTY_FUNCTION__ << ": JSON is valid";
             QJsonObject obj = doc.object();
-            if (obj.contains("database") && obj.contains("table"))
+            if (obj.contains("database") && obj.contains("table")) {
                 queryTable(obj["database"].toString(), obj["table"].toString());
+            }
         }
         else {
             qDebug() << __PRETTY_FUNCTION__ << message;
